@@ -1,0 +1,12 @@
+ Validation Summary Epoch: 1 Average WER 12.4246474015  Average CER 2.64300834117
+ Validation Summary Epoch: 1 Average WER 102.5  Average CER 70.0766363266
+ Found better validated model epoch: 1 Average WER 102.5  Average CER 70.0766363266
+ Validation Summary Epoch: 2 Average WER 100.0  Average CER 75.9137529138
+ Found better validated model epoch: 2 Average WER 100.0  Average CER 75.9137529138
+ Validation Summary Epoch: 1 Average WER 100.0  Average CER 77.5401265401
+ Validation Summary Epoch: 1 Average WER 103.5  Average CER 75.105958856
+ Found better validated model epoch: 1 Average WER 103.5  Average CER 75.105958856
+ Validation Summary Epoch: 2 Average WER 100.0  Average CER 83.1872479372
+ Found better validated model epoch: 2 Average WER 100.0  Average CER 83.1872479372
+ Validation Summary Epoch: 3 Average WER 100.0  Average CER 86.4091649092
+ Validation Summary Epoch: 4 Average WER 100.0  Average CER 86.6364376364

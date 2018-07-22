@@ -1,0 +1,3 @@
+
+python train.py   --train_manifest /lium/raid01_b/ghannay/post-doc/IWSLT-2018/data/TED_LIUM/TED_train_manifestp.csv  --val_manifest /lium/raid01_b/ghannay/post-doc/IWSLT-2018/data/TED_LIUM/TED_val_manifestp.csv --log_params --cuda --tensorboard --rnn_type lstm --augment  --labels_path /lium/raid01_b/ghannay/post-doc/IWSLT-2018/data/TED_LIUM/TED_LIUM2_labels_ubiqusY.json  --wdir /lium/buster1/ghannay/deepSpeech2/deepspeech_Seq2Seq   --checkpoint  --epochs 70  
+
