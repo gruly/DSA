@@ -142,12 +142,10 @@ class DeepSpeech(nn.Module):
         self._audio_conf = audio_conf or {}
         self._labels = labels
         self._bidirectional = bidirectional
-        # Define parameters
+        # Define decoder parameters
         self._dec_hidden_size = dec_hidden_size
         self._n_layers = dec_n_layers
         self._dropout_p = dec_dropout_p 
-	#self.sample_prob = 0.4
-        #self.scheduled_sampling = (self.sample_prob != 0)
 
 
         sample_rate = self._audio_conf.get("sample_rate", 16000)
@@ -155,6 +153,7 @@ class DeepSpeech(nn.Module):
         num_classes = len(self._labels)
 	print (" num classess ", num_classes)
 
+	# Encoder
         self.conv = nn.Sequential(
             nn.Conv2d(1, 32, kernel_size=(41, 11), stride=(2, 2), padding=(0, 10)),
             nn.BatchNorm2d(32),
@@ -227,10 +226,7 @@ class DeepSpeech(nn.Module):
         x should be shape (batch, time, hidden dimension)
         y should be shape (batch, label sequence length)
         """
-  #      print (" y.size  ", y.size())       
         # Prepare decoder input and outputs
-	# TODO il faut changer l'initialisation de la couche de decoder avec la dernier couche de l'encoder
-       # print (" decoder_hidden  ", type(decoder_hidden), "  decoder_hidden  ", decoder_hidden.size())
         decoder_input = Variable(torch.LongTensor([1] * y.size()[1])).cuda() # padding index
         decoder_hidden = torch.autograd.Variable(torch.rand(1,y.size(1),self._dec_hidden_size)).cuda()  #torch.zeros(1, y.size(0),self._dec_hidden_size) # 1 x B x  H
         all_decoder_outputs = Variable(torch.zeros(y.size()[0], y.size(1), len(self._labels))).cuda()
@@ -240,7 +236,7 @@ class DeepSpeech(nn.Module):
             word_embedded = self.embedding(decoder_input)#.view(1, 1, -1)
             word_embedded=word_embedded.view(1,word_embedded.size(0),word_embedded.size(1))
 	    word_embedded = self.dropout(word_embedded).contiguous()
-    # Calculate attention weights and apply to encoder outputs
+            # Calculate attention weights and apply to encoder outputs
             attn_weights = self.attn(last_hidden, encoder_outputs)
             context = attn_weights.bmm(encoder_outputs.transpose(0, 1)) # B x 1 x N
             context = context.transpose(0, 1).contiguous() # 1 x B x N
@@ -258,24 +254,20 @@ class DeepSpeech(nn.Module):
             all_decoder_outputs[t] = decoder_output # Store this step's outputs
 	    #Next input is current target
             decoder_input = y[t]
-         #   print (" all_decoder_outputs[t]  ", all_decoder_outputs[t])
         
-        # identity in training mode, softmax in eval mode
-        # Return final output, hidden state, and attention weights (for visualization)
         return all_decoder_outputs
 
 
     def forward(self, x, y):
         # encoder
         encoder_outputs, encoder_hidden = self.encode(x) 
- #       print (" encoder_hidden  ", encoder_hidden.size())
 	# decoder
         y=y.transpose(0,1)
         out = self.decode(encoder_outputs, encoder_hidden, y)
         out=out.transpose(0, 1).contiguous()
         return out
        
-
+    # Laod from pretrained model (used for speech models : load encoder prameters)
     def load_from_pretrained_file(self, path):
         old_weights = torch.load(path, map_location=lambda storage, loc: storage)['state_dict']
 	print('Removing softmax layer with shape: ', old_weights.pop('fc.0.module.1.weight').shape)
