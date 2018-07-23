@@ -206,7 +206,9 @@ def _collate_fn(batch):
     max_seqlength_target = len(longest_target)
     inputs = torch.zeros(minibatch_size, 1, freq_size, max_seqlength)
     input_percentages = torch.FloatTensor(minibatch_size)
-    target_sizes = torch.IntTensor(minibatch_size)
+    # for the cross entropy loss you need LongTensor not IntTensor
+    target_sizes = torch.LongTensor(minibatch_size)
+    #target_sizes = torch.IntTensor(minibatch_size)
     audio_ids = []
     targets = []
     target_batch = []
