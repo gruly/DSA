@@ -281,25 +281,18 @@ if __name__ == '__main__':
             # measure data loading time
             data_time.update(time.time() - end)
             inputs = Variable(inputs, requires_grad=False)
-           # target_sizes = Variable(target_sizes, requires_grad=False)
             targets = Variable(targets, requires_grad=False)
             target_batch = Variable(target_batch, requires_grad=False)
-#	    print ("target  ", targets  )
- #           print ("target_batch  ", target_batch  )
-  #          print "targets  ", targets, " target_sizes ",target_sizes,"\n"
             if args.cuda:
                 inputs = inputs.cuda()
 		target_batch = target_batch.cuda() 
             out = model(inputs, target_batch)
-            #out = model(inputs)
             out = out.contiguous()  # TxNxH
 
             seq_length = out.size(0)
             sizes = Variable(input_percentages.mul_(int(seq_length)).int(), requires_grad=False)
-#            loss = criterion(out, targets, sizes, target_sizes) :
             #  Test masked cross entropy loss : returns An average loss value masked by the length, and the loss.sum() .
             loss_avg_length, loss= masked_cross_entropy( out, target_batch.contiguous(),target_sizes)
-            #print ( " loss_avg_length ", loss_avg_length, " loss  ", loss)
             loss = loss / inputs.size(0)  # average the loss by minibatch
             loss_sum = loss.data.sum()
             inf = float("inf")
@@ -364,14 +357,10 @@ if __name__ == '__main__':
                 split_targets.append(targets[offset:offset + size])
                 offset += size
 	   
-#	    print ("target  ", targets  )
-#	    print ("target_batch  ", target_batch  )
-#	    print "targets  ", targets, " target_sizes ",target_sizes,"\n"
             if args.cuda:
                 inputs = inputs.cuda()
 		target_batch = target_batch.cuda()
             out = model(inputs, target_batch)
-#            print (" OUT  ", out)
             out = out.transpose(0, 1)  # TxNxH
             seq_length = out.size(0)
             sizes = input_percentages.mul_(int(seq_length)).int()
