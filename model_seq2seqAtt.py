@@ -266,6 +266,16 @@ class DeepSpeech(nn.Module):
         out = self.decode(encoder_outputs, encoder_hidden, y)
         out=out.transpose(0, 1).contiguous()
         return out
+    # freeze the parameters of the encoder
+    def freeze_updates (self):
+        child_counter = 0
+        for child in self.children():
+            if child_counter < 2:
+                for param in child.parameters():
+                    param.requires_grad = False
+            child_counter += 1
+
+
        
     # Laod from pretrained model (used for speech models : load encoder prameters)
     def load_from_pretrained_file(self, path):
