@@ -50,6 +50,7 @@ parser.add_argument('--continue_from', default='', help='Continue from checkpoin
 parser.add_argument('--pretrained', default='', help='Pretrained model file')
 parser.add_argument('--finetune', dest='finetune', action='store_true',
                     help='Finetune the model from checkpoint "continue_from"')
+parser.add_argument('--freeze', dest='freeze', action='store_true', help='freeze the encoder parameter (2 first components) CNN and RNNs')
 parser.add_argument('--augment', dest='augment', action='store_true', help='Use random tempo and gain perturbations.')
 parser.add_argument('--noise_dir', default=None,
                     help='Directory to inject noise into audio. If default, noise Inject not added')
@@ -242,8 +243,17 @@ if __name__ == '__main__':
 	if args.pretrained:
 	   print('Given pretrained file ', args.pretrained)
 	   model.load_from_pretrained_file(args.pretrained)
+           if args.freeze  :
+               print (" Freezing the paramters of the encoder ") 
+	       # freeze the paramters of the encoder
+               model.freeze_updates()
+              
         parameters = model.parameters()
-        optimizer = torch.optim.SGD(parameters, lr=args.lr,
+        if args.freeze : 
+            optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad, parameters), lr=args.lr,
+                                    momentum=args.momentum, nesterov=True)
+        else:
+            optimizer = torch.optim.SGD(parameters, lr=args.lr,
                                     momentum=args.momentum, nesterov=True)
     decoder = GreedyDecoder(labels)
     train_dataset = SpectrogramDataset(audio_conf=audio_conf, manifest_filepath=args.train_manifest, labels=labels,
