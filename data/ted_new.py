@@ -13,7 +13,6 @@ import wave
 parser = argparse.ArgumentParser(description='Processes and downloads TED-LIUMv2/TED_LIUM3 dataset.')
 parser.add_argument("--target_dir", default='TEDLIUM_dataset/', type=str, help="Directory to store the dataset.")
 parser.add_argument("--source_dir", type=str, help="TEDLIUM ubiquis source dir.")
-parser.add_argument("--csv_file", type=str, help="name of csv file")
 parser.add_argument('--sample_rate', default=16000, type=int, help='Sample rate')
 args = parser.parse_args()
 
@@ -98,10 +97,6 @@ def prepare_dir(ted_dir):
                 	          sample_rate=args.sample_rate)
             	with io.FileIO(target_txt_file, "w") as f:
                 	f.write(_preprocess_transcript(utterance["transcript"]).encode('utf-8'))
-            else:
-		if s==0:
-			print " ==> Problem with this file ",sph_file_full 
-			s=1
 	counter += 1
 
 
@@ -111,21 +106,37 @@ def main():
     if not os.path.exists(target_dl_dir):
         os.makedirs(target_dl_dir)
 
+
+
+
+    # prepare target dir
+    target_train_dir = os.path.join(target_dl_dir, "train")
+    if not os.path.exists(target_train_dir):
+        os.makedirs(target_train_dir)
+    target_val_dir = os.path.join(target_dl_dir, "dev")
+    if not os.path.exists(target_val_dir):
+        os.makedirs(target_val_dir)
+    target_test_dir = os.path.join(target_dl_dir, "test")
+    if not os.path.exists(target_test_dir):
+        os.makedirs(target_test_dir)
+    # source dir
     source_train = os.path.join(source_dl_dir, "train")
+    source_val = os.path.join(source_dl_dir, "dev")
+    source_test = os.path.join(source_dl_dir, "test")
 
-    train_ted_dir = os.path.join(target_dl_dir, "train")
-   # val_ted_dir = os.path.join(target_unpacked_dir, "dev")
-   # test_ted_dir = os.path.join(target_unpacked_dir, "test")
 
-    prepare_dir(source_train)
-    #prepare_dir(val_ted_dir)
-    #prepare_dir(test_ted_dir)
+    print " prepare data for train  "
+    prepare_dir(target_train_dir, source_train, data_type)
+    print " prepare data for dev  "
+    prepare_dir(target_val_dir, source_val, data_type)
+    print " prepare data for test  "
+    prepare_dir(target_test_dir, source_test, data_type)
     print('Creating manifests...')
-
-    create_manifest(train_ted_dir, os.path.join(source_train, "converted"), args.csv_file,data_type="train")
-    #create_manifest(target_dl_dir, os.path.join(source_train, "converted"), args.csv_file)
-   # create_manifest(val_ted_dir, 'ted_val')
-   # create_manifest(test_ted_dir, 'ted_test')
+    print " target_train_dir ", target_train_dir
+    print " target_dl_dir  ", target_dl_dir
+    create_manifest(target_dl_dir, os.path.join(target_train_dir, "converted"), 'train')
+    create_manifest(target_dl_dir, os.path.join(target_val_dir, "converted"), 'val')
+    create_manifest(target_dl_dir, os.path.join(target_test_dir, "converted"), 'test')
 
 
 if __name__ == "__main__":
